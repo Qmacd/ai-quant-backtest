@@ -8,19 +8,25 @@ import gc
 from tools.db_mysql import get_engine
 from tools import Log
 from strategies.AI_KDJ_Strategy import AI_KDJ_Strategy
+from models.lstm_predictor import PricePredictor
 
 class BacktestEngine:
-    def __init__(self, init_cash=2000000, commission=0.0001):
+    def __init__(self, init_cash=2000000, commission=0.0001, predictor=None):
         """
         初始化回测引擎
         :param init_cash: 初始资金
         :param commission: 手续费率
+        :param predictor: 预测器实例 (必须有一个predict方法)
         """
         self.cerebro = bt.Cerebro()
         self.cerebro.broker.setcash(init_cash)
         self.cerebro.broker.setcommission(commission=commission)
         self.engine = get_engine()
-        self._cache = None  # 用于缓存期货合约信息
+        self._cache = None
+        self.predictor = predictor
+        
+        if self.predictor is None:
+            Log.log("警告：未指定预测器，回测将不会包含AI预测部分。", dt=datetime.now())
         
     def get_margin_percent(self, data):
         """
@@ -109,22 +115,25 @@ class BacktestEngine:
         
         return df
         
-    def run_backtest(self, symbol, freq, predict_prices, predict_dates, 
-                    strategy_start_date, strategy_end_date, atr_threshold=0.005):
+    def run_backtest(self, symbol, freq, strategy_start_date, strategy_end_date, atr_threshold=0.005):
         """
         运行回测
         :param symbol: 期货代码
         :param freq: 频率（day/min）
-        :param predict_prices: 预测价格序列
-        :param predict_dates: 预测日期序列
         :param strategy_start_date: 策略开始日期
         :param strategy_end_date: 策略结束日期
         :param atr_threshold: ATR阈值
         :return: 回测结果字典
         """
+        if self.predictor is None:
+            raise ValueError("未指定预测器，无法运行包含预测的策略。")
+
         try:
-            # 准备数据
+            # 准备历史数据
             df = self.prepare_data(symbol, freq, strategy_start_date, strategy_end_date)
+            
+            # 使用传入的预测器进行预测
+            predict_prices, predict_dates = self.predictor.predict(df)
             
             # 创建DataFeed
             data_feed = bt.feeds.PandasData(
@@ -174,7 +183,11 @@ class BacktestEngine:
                 'profit_factor': abs(strategy.total_profit / strategy.total_loss) if strategy.total_loss != 0 else float('inf'),
                 'signal_table': strategy.generate_signal_table(),
                 'daily_equity': strategy.daily_equity,
-                'trade_info': strategy.info  # 添加交易记录
+                'trade_info': strategy.info,
+                'predictions': {
+                    'prices': predict_prices.tolist(),
+                    'dates': predict_dates
+                }
             }
             
             return backtest_results
@@ -198,6 +211,15 @@ class BacktestEngine:
         """
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
+            
+        # 保存预测结果
+        predictions_df = pd.DataFrame({
+            'date': results['predictions']['dates'],
+            'predicted_price': results['predictions']['prices']
+        })
+        predictions_path = os.path.join(output_dir, 'predictions.csv')
+        predictions_df.to_csv(predictions_path, index=False, encoding='utf-8-sig')
+        Log.log(f"\n预测结果已保存至: {predictions_path}")
             
         # 保存信号表
         if results['signal_table'] is not None:
@@ -235,24 +257,23 @@ class BacktestEngine:
 
 # 使用示例
 if __name__ == '__main__':
-    # 创建回测引擎实例
-    engine = BacktestEngine(init_cash=2000000, commission=0.0001)
+    # 创建一个预测器实例（这里使用LSTM作为示例）
+    lstm_predictor = PricePredictor()
+
+    # 创建回测引擎实例，传入预测器
+    engine = BacktestEngine(init_cash=2000000, commission=0.0001, predictor=lstm_predictor)
     
     # 设置回测参数
     symbol = '1200'  # 螺纹钢期货
     freq = 'day'
-    predict_prices = [2990, 2950, 2949.8, 3000, 3000.4]
-    predict_dates = ['20241216', '20241217', '20241218', '20241219', '20241220']
     strategy_start_date = '20241216'
     strategy_end_date = '20241220'
     
     try:
-        # 运行回测
+        # 运行回测（现在包含了预测过程）
         results = engine.run_backtest(
             symbol=symbol,
             freq=freq,
-            predict_prices=predict_prices,
-            predict_dates=predict_dates,
             strategy_start_date=strategy_start_date,
             strategy_end_date=strategy_end_date
         )

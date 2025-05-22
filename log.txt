@@ -15,3 +15,24 @@
 交易记录已保存至: backtest_results\signal_info.csv
 2025-05-22 13:37:50 
 回测摘要已保存至: backtest_results\backtest_summary.csv
+2025-05-22 14:23:04 回测过程中出现错误: non-broadcastable output operand with shape (21,1) doesn't match the broadcast shape (21,5)
+2025-05-22 14:23:04 回测失败: non-broadcastable output operand with shape (21,1) doesn't match the broadcast shape (21,5)
+2025-05-22 14:24:16 初始资金: 2000000.00
+2024-12-20 00:00:00 最终权益:1927012.3264000001
+2024-12-20 00:00:00 权益最大回撤:95465.9635999999
+2024-12-20 00:00:00 总交易次数:3
+2024-12-20 00:00:00 最大单笔盈利:24050.00
+2024-12-20 00:00:00 最大单笔亏损:0.00
+2024-12-20 00:00:00 盈利次数:2
+2024-12-20 00:00:00 亏损次数:0
+2025-05-22 14:24:17 最终资金: 2002603.33
+2025-05-22 14:24:17 
+预测结果已保存至: backtest_results\predictions.csv
+2025-05-22 14:24:17 
+信号表已保存至: backtest_results\AI_KDJ_signal_table.csv
+2025-05-22 14:24:17 
+每日权益记录已保存至: backtest_results\AI_KDJ_equity.csv
+2025-05-22 14:24:17 
+交易记录已保存至: backtest_results\signal_info.csv
+2025-05-22 14:24:17 
+回测摘要已保存至: backtest_results\backtest_summary.csv
