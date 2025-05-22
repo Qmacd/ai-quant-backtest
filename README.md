@@ -56,7 +56,7 @@ ai-quant-backtest/
    - `predict` 方法应接受一个pandas DataFrame作为输入，并返回两个列表/numpy数组：预测价格序列和对应的日期序列。
    - 示例 (`models/lstm_predictor.py`) 中展示了一个基于LSTM的预测器实现。
 
-   ```python
+```python
 import torch
 import torch.nn as nn
 import numpy as np
@@ -143,7 +143,7 @@ class PricePredictor:
         print(f"预测日期数量: {len(predict_dates)}")
 
         return predictions, predict_dates
-   ```
+```
 
 2. 运行回测示例：
    您可以直接运行 `demo.py` 文件来执行一个回测示例。
