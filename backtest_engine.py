@@ -266,7 +266,7 @@ if __name__ == '__main__':
     # 设置回测参数
     symbol = '1200'  # 螺纹钢期货
     freq = 'day'
-    strategy_start_date = '20241216'
+    strategy_start_date = '20241201' 
     strategy_end_date = '20241220'
     
     try:

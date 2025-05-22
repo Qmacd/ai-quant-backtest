@@ -40,8 +40,13 @@ class PricePredictor:
             X.append(scaled_data[i:(i + sequence_length)])
         return np.array(X)
         
-    def predict(self, df, predict_days=5):
-        """预测未来价格"""
+    def predict(self, df, predict_days=None):
+        """
+        预测未来价格
+        :param df: 历史数据DataFrame
+        :param predict_days: 预测天数，如果为None则预测整个回测区间
+        :return: 预测价格和日期
+        """
         sequence_length = 10
         X = self.prepare_data(df, sequence_length)
         
@@ -61,7 +66,21 @@ class PricePredictor:
         
         # 生成预测日期
         last_date = df.index[-1]
+        if predict_days is None:
+            # 计算回测区间的天数
+            start_date = df.index[0]
+            predict_days = (last_date - start_date).days + 1
+            
+        # 确保预测天数和预测结果长度一致
+        predict_days = min(predict_days, len(predictions))
+        predictions = predictions[:predict_days]
+        
         predict_dates = [(last_date + timedelta(days=i+1)).strftime('%Y%m%d') 
                         for i in range(predict_days)]
         
-        return predictions[:predict_days], predict_dates 
+        # 打印调试信息
+        print(f"预测天数: {predict_days}")
+        print(f"预测价格数量: {len(predictions)}")
+        print(f"预测日期数量: {len(predict_dates)}")
+        
+        return predictions, predict_dates 
