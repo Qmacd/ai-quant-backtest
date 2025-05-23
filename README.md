@@ -40,9 +40,9 @@ AI-KDJ 是一个面向金融AI模型的全新时序预测性能评估接口，�
   - backtrader
   - pandas
   - numpy
-- scikit-learn (如果使用基于sklearn的预测模型)
-- torch (如果使用基于PyTorch的预测模型，如示例中的LSTM)
-  - psutil
+  - scikit-learn (如果使用基于sklearn的预测模型)
+  - torch (如果使用基于PyTorch的预测模型，如示例中的LSTM)
+  - psutil 
 
 ## ⬇️ 安装步骤
 
@@ -296,7 +296,3 @@ except Exception as e:
 ## 🤝 贡献指南
 
 欢迎提交Issue和Pull Request来帮助改进项目。
-
-## 📄 许可证
-
-[添加许可证信息] 
